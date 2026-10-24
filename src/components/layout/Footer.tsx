@@ -71,6 +71,11 @@ export default function Footer() {
               <li>
                 <Link href="/track-order" className="hover:text-[#FF5A1F] transition-colors">Track Order</Link>
               </li>
+              <li>
+                <Link href="/admin" className="hover:text-[#FF5A1F] transition-colors flex items-center gap-1.5">
+                  Admin Panel <span className="text-[10px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5 rounded font-mono">Staff</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
