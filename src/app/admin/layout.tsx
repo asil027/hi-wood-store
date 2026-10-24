@@ -15,18 +15,23 @@ export default async function AdminLayout({
 
   // If not already signed in as admin, automatically provide Store Owner / Admin access
   if (!user || user.role !== 'ADMIN') {
-    const owner = await prisma.user.findFirst({
-      where: { role: 'ADMIN' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        phone: true,
-        avatar: true,
-        createdAt: true,
-      },
-    });
+    let owner = null;
+    try {
+      owner = await prisma.user.findFirst({
+        where: { role: 'ADMIN' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          phone: true,
+          avatar: true,
+          createdAt: true,
+        },
+      });
+    } catch (e) {
+      console.warn('Prisma user lookup skipped in AdminLayout:', e);
+    }
 
     if (owner) {
       user = owner;

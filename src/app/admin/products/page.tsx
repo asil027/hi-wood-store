@@ -8,18 +8,29 @@ import ProductsManager from './ProductsManager';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminProductsPage() {
-  const [products, categories, collections] = await Promise.all([
-    prisma.product.findMany({
-      include: {
-        images: true,
-        category: true,
-        collection: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.category.findMany(),
-    prisma.collection.findMany(),
-  ]);
+  let products: any[] = [];
+  let categories: any[] = [];
+  let collections: any[] = [];
+
+  try {
+    const [_products, _categories, _collections] = await Promise.all([
+      prisma.product.findMany({
+        include: {
+          images: true,
+          category: true,
+          collection: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.category.findMany(),
+      prisma.collection.findMany(),
+    ]);
+    products = _products;
+    categories = _categories;
+    collections = _collections;
+  } catch (e) {
+    console.warn('Failed to load products in admin:', e);
+  }
 
   return (
     <div className="space-y-6">

@@ -20,38 +20,54 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminDashboardPage() {
   // Live Database Queries
-  const [
-    totalOrdersCount,
-    orders,
-    customers,
-    productsCount,
-    topSellingProducts,
-  ] = await Promise.all([
-    prisma.order.count(),
-    prisma.order.findMany({
-      take: 6,
-      orderBy: { createdAt: 'desc' },
-      include: { items: true },
-    }),
-    prisma.user.findMany({
-      where: { role: 'CUSTOMER' },
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.product.count(),
-    prisma.product.findMany({
-      where: { isPublished: true },
-      take: 4,
-      orderBy: { reviewCount: 'desc' },
-      include: { images: true },
-    }),
-  ]);
+  let totalOrdersCount = 0;
+  let orders: any[] = [];
+  let customers: any[] = [];
+  let productsCount = 0;
+  let topSellingProducts: any[] = [];
+  let totalSales = 0;
 
-  // Aggregate total sales
-  const allOrders = await prisma.order.findMany({
-    select: { totalAmount: true, orderStatus: true },
-  });
-  const totalSales = allOrders.reduce((acc, o) => acc + o.totalAmount, 0);
+  try {
+    const [
+      _totalOrdersCount,
+      _orders,
+      _customers,
+      _productsCount,
+      _topSellingProducts,
+      allOrders,
+    ] = await Promise.all([
+      prisma.order.count(),
+      prisma.order.findMany({
+        take: 6,
+        orderBy: { createdAt: 'desc' },
+        include: { items: true },
+      }),
+      prisma.user.findMany({
+        where: { role: 'CUSTOMER' },
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.product.count(),
+      prisma.product.findMany({
+        where: { isPublished: true },
+        take: 4,
+        orderBy: { reviewCount: 'desc' },
+        include: { images: true },
+      }),
+      prisma.order.findMany({
+        select: { totalAmount: true, orderStatus: true },
+      }),
+    ]);
+
+    totalOrdersCount = _totalOrdersCount;
+    orders = _orders;
+    customers = _customers;
+    productsCount = _productsCount;
+    topSellingProducts = _topSellingProducts;
+    totalSales = allOrders.reduce((acc, o) => acc + o.totalAmount, 0);
+  } catch (err) {
+    console.warn('AdminDashboardPage database query fallback:', err);
+  }
 
   // Status badge styling
   const statusBadges: Record<string, { bg: string; text: string }> = {
