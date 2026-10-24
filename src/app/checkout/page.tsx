@@ -97,7 +97,14 @@ export default function CheckoutPage() {
 
       if (res.ok && data.success) {
         clearCart();
-        router.push(`/order-confirmation/${data.order.orderNumber}`);
+        const query = new URLSearchParams({
+          name: data.order.customerName || customerName,
+          total: String(data.order.totalAmount || 0),
+          email: data.order.customerEmail || customerEmail,
+          city: city || '',
+          method: paymentMethod || 'COD',
+        }).toString();
+        router.push(`/order-confirmation/${data.order.orderNumber}?${query}`);
       } else {
         setErrorMessage(data.error || 'Failed to place order. Please try again.');
         setIsSubmitting(false);
