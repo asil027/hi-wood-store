@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Search,
   Filter,
@@ -12,6 +12,7 @@ import {
   Download,
   X,
   AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 
 interface OrdersManagerProps {
@@ -24,6 +25,33 @@ export default function OrdersManager({ initialOrders }: OrdersManagerProps) {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string>('Just now');
+
+  const fetchLatestOrders = useCallback(async (showIndicator = false) => {
+    if (showIndicator) setIsRefreshing(true);
+    try {
+      const res = await fetch('/api/admin/orders');
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.orders)) {
+        setOrders(data.orders);
+        setLastUpdated(new Date().toLocaleTimeString());
+      }
+    } catch (err) {
+      console.warn('Failed to refresh orders:', err);
+    } finally {
+      if (showIndicator) setIsRefreshing(false);
+    }
+  }, []);
+
+  // Poll for new incoming orders every 10 seconds automatically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchLatestOrders(false);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [fetchLatestOrders]);
+
 
   // Edit status modal state
   const [newStatus, setNewStatus] = useState('');
@@ -140,6 +168,22 @@ export default function OrdersManager({ initialOrders }: OrdersManagerProps) {
             <option value="DELIVERED">Delivered</option>
             <option value="CANCELLED">Cancelled</option>
           </select>
+
+          {/* Refresh Orders */}
+          <button
+            onClick={() => fetchLatestOrders(true)}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3 py-2.5 rounded-2xl bg-white border border-[#E8E8E8] hover:border-[#FF5A1F] text-xs font-bold text-[#111111] transition-colors cursor-pointer"
+            title="Refresh order list"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#FF5A1F] ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Syncing...' : 'Refresh'}</span>
+          </button>
+
+          <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Auto-Sync Active ({orders.length} orders)
+          </span>
         </div>
 
         {/* Export Button */}
