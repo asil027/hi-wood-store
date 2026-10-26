@@ -1,8 +1,15 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Truck, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function ShippingPolicyPage() {
+  const { settings } = useSettings();
+  const threshold = settings?.freeShippingThreshold ?? 3000;
+  const stdFee = settings?.standardShippingFee ?? 250;
+
   return (
     <div className="bg-white min-h-screen py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -21,10 +28,11 @@ export default function ShippingPolicyPage() {
           <div className="p-6 rounded-2xl bg-neutral-50 border border-neutral-200/80 space-y-2">
             <h3 className="text-base font-bold text-[#111111] flex items-center gap-2">
               <Truck className="w-5 h-5 text-[#FF5A1F]" />
-              <span>Free Nationwide Delivery Over Rs. 3,000</span>
+              <span>Free Nationwide Delivery Over Rs. {threshold.toLocaleString()}</span>
             </h3>
             <p>
-              We offer free standard delivery across all cities and towns in Pakistan for orders totaling Rs. 3,000 or above. For orders under Rs. 3,000, a flat shipping fee of Rs. 250 applies.
+              {settings?.shippingPolicyText ||
+                `We offer free standard delivery across all cities and towns in Pakistan for orders totaling Rs. ${threshold.toLocaleString()} or above. For orders under Rs. ${threshold.toLocaleString()}, a flat shipping fee of Rs. ${stdFee} applies.`}
             </p>
           </div>
 

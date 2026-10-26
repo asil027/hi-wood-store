@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CartItemType } from '@/lib/types';
+import { useSettings } from '@/context/SettingsContext';
 
 interface AppliedCoupon {
   code: string;
@@ -23,6 +24,8 @@ interface CartContextType {
   subtotal: number;
   discountAmount: number;
   shippingFee: number;
+  freeShippingThreshold: number;
+  standardShippingFee: number;
   totalAmount: number;
   totalItems: number;
 }
@@ -145,8 +148,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Free shipping threshold = Rs. 3000
-  const shippingFee = subtotal >= 3000 || subtotal === 0 ? 0 : 250;
+  const { settings } = useSettings();
+  const freeShippingThreshold = settings?.freeShippingThreshold ?? 3000;
+  const standardShippingFee = settings?.standardShippingFee ?? 250;
+
+  // Free shipping threshold = from store settings
+  const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : standardShippingFee;
   const totalAmount = Math.max(0, subtotal - discountAmount + shippingFee);
   const totalItems = items.reduce((acc, i) => acc + i.quantity, 0);
 
@@ -166,6 +173,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         subtotal,
         discountAmount,
         shippingFee,
+        freeShippingThreshold,
+        standardShippingFee,
         totalAmount,
         totalItems,
       }}

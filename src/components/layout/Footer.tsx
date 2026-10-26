@@ -1,8 +1,13 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { Mail, Phone, MapPin, Instagram, Facebook, Twitter, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function Footer() {
+  const { settings } = useSettings();
+
   return (
     <footer className="bg-[#111111] text-white pt-16 pb-12 border-t border-neutral-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,12 +19,13 @@ export default function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-0.5">
               <span className="text-3xl font-extrabold tracking-tight text-white">
-                Hiwood
+                {settings?.storeName || 'Hiwood'}
               </span>
               <span className="w-2.5 h-2.5 rounded-full bg-[#FF5A1F] ml-0.5"></span>
             </Link>
             <p className="text-neutral-400 text-sm leading-relaxed max-w-sm">
-              Carry Your World. Premium quality everyday backpacks designed for comfort, rugged durability, and modern urban aesthetics across Pakistan.
+              {settings?.tagline ? `${settings.tagline}. ` : ''}
+              Premium quality everyday backpacks designed for comfort, rugged durability, and modern urban aesthetics across Pakistan.
             </p>
             <div className="flex items-center space-x-3 pt-2">
               <a
@@ -107,15 +113,27 @@ export default function Footer() {
             <div className="space-y-3 text-sm text-neutral-400">
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-[#FF5A1F] shrink-0 mt-0.5" />
-                <span>Plot 42, Korangi Industrial Area, Karachi, Pakistan</span>
+                <span>{settings?.address || 'Plot 42, Sector 15, Korangi Industrial Area, Karachi, Pakistan'}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-[#FF5A1F] shrink-0" />
-                <span>+92 300 1234567</span>
+                <a
+                  href={`https://wa.me/${(settings?.contactPhone || '').replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-[#FF5A1F] transition-colors"
+                >
+                  {settings?.contactPhone || '+92 300 1234567'}
+                </a>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-[#FF5A1F] shrink-0" />
-                <span>support@hiwood.pk</span>
+                <a
+                  href={`mailto:${settings?.contactEmail || 'support@hiwood.pk'}`}
+                  className="hover:text-[#FF5A1F] transition-colors"
+                >
+                  {settings?.contactEmail || 'support@hiwood.pk'}
+                </a>
               </div>
             </div>
           </div>
@@ -124,7 +142,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
           <div>
-            © {new Date().getFullYear()} Hiwood Pakistan. All rights reserved. Carry Your World.
+            © {new Date().getFullYear()} {settings?.storeName || 'Hiwood'} Pakistan. All rights reserved. {settings?.tagline || 'Carry Your World.'}
           </div>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-neutral-400">

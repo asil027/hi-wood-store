@@ -7,8 +7,9 @@ export const dynamic = 'force-dynamic';
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: { q?: string; category?: string; sort?: string; minPrice?: string; maxPrice?: string };
+  searchParams?: Promise<{ q?: string; category?: string; sort?: string; minPrice?: string; maxPrice?: string }> | { q?: string; category?: string; sort?: string; minPrice?: string; maxPrice?: string };
 }) {
+  const sp = searchParams ? await Promise.resolve(searchParams) : {};
   const categories = await prisma.category.findMany({
     where: { isActive: true },
     orderBy: { displayOrder: 'asc' },
@@ -50,9 +51,9 @@ export default async function ShopPage({
       <ShopClient
         products={formattedProducts}
         categories={categories}
-        initialSearch={searchParams.q || ''}
-        initialCategory={searchParams.category || ''}
-        initialSort={searchParams.sort || 'featured'}
+        initialSearch={sp.q || ''}
+        initialCategory={sp.category || ''}
+        initialSort={sp.sort || 'featured'}
       />
     </div>
   );

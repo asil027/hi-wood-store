@@ -1,9 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Save, CheckCircle2, AlertCircle, Eye, RefreshCw } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function ContentEditorClient({ initialSettings }: { initialSettings: any }) {
+  const router = useRouter();
+  const { updateLocalSettings, refreshSettings } = useSettings();
   const [heroHeading, setHeroHeading] = useState(initialSettings?.heroHeading || 'Carry\nYour World');
   const [heroSubheading, setHeroSubheading] = useState(
     initialSettings?.heroSubheading ||
@@ -38,26 +42,31 @@ export default function ContentEditorClient({ initialSettings }: { initialSettin
     setError('');
 
     try {
+      const payload = {
+        heroHeading,
+        heroSubheading,
+        heroButtonText,
+        heroImageUrl,
+        promoHeading,
+        promoSubheading,
+        promoButtonText,
+        promoImageUrl,
+        announcementText,
+        announcementActive,
+      };
+
       const res = await fetch('/api/admin/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          heroHeading,
-          heroSubheading,
-          heroButtonText,
-          heroImageUrl,
-          promoHeading,
-          promoSubheading,
-          promoButtonText,
-          promoImageUrl,
-          announcementText,
-          announcementActive,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
         setSaveSuccess(true);
+        updateLocalSettings(payload);
+        await refreshSettings();
+        router.refresh();
       } else {
         setError(data.error || 'Failed to save settings');
       }

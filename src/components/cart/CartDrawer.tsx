@@ -16,6 +16,7 @@ export default function CartDrawer() {
     subtotal,
     discountAmount,
     shippingFee,
+    freeShippingThreshold = 3000,
     totalAmount,
     coupon,
     applyCoupon,
@@ -217,13 +218,15 @@ export default function CartDrawer() {
                 <div className="flex justify-between text-neutral-600">
                   <span>Free Shipping Status:</span>
                   <span className="font-bold text-[#111111]">
-                    {subtotal >= 3000 ? 'Unlocked! (Rs. 0)' : `Add Rs. ${(3000 - subtotal).toLocaleString()} for Free Delivery`}
+                    {subtotal >= freeShippingThreshold
+                      ? 'Unlocked! (Rs. 0)'
+                      : `Add Rs. ${(freeShippingThreshold - subtotal).toLocaleString()} for Free Delivery`}
                   </span>
                 </div>
                 <div className="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
                   <div
                     className="bg-[#FF5A1F] h-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, (subtotal / 3000) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (subtotal / (freeShippingThreshold || 3000)) * 100)}%` }}
                   />
                 </div>
               </div>

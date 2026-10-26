@@ -1,8 +1,13 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { RefreshCw, CheckCircle2 } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function ReturnPolicyPage() {
+  const { settings } = useSettings();
+
   return (
     <div className="bg-white min-h-screen py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -24,7 +29,8 @@ export default function ReturnPolicyPage() {
               <span>Easy 7-Day Window</span>
             </h3>
             <p>
-              We want you to love your Hiwood bag. If you are not satisfied with the size, color, or style, you may exchange or return it within 7 calendar days of receipt.
+              {settings?.returnPolicyText ||
+                `We want you to love your ${settings?.storeName || 'Hiwood'} bag. If you are not satisfied with the size, color, or style, you may exchange or return it within 7 calendar days of receipt.`}
             </p>
           </div>
 
@@ -37,7 +43,9 @@ export default function ReturnPolicyPage() {
 
           <h3 className="text-lg font-bold text-[#111111] pt-4">How to Initiate a Return</h3>
           <p>
-            Simply send a WhatsApp message to our dedicated support helpline at <strong>+92 300 1234567</strong> or email <strong>support@hiwood.pk</strong> with your Order Number and photos of the bag. Our team will guide you through our courier pickup or drop-off process.
+            Simply send a WhatsApp message to our dedicated support helpline at{' '}
+            <strong>{settings?.contactPhone || '+92 300 1234567'}</strong> or email{' '}
+            <strong>{settings?.contactEmail || 'support@hiwood.pk'}</strong> with your Order Number and photos of the bag. Our team will guide you through our courier pickup or drop-off process.
           </p>
 
           <h3 className="text-lg font-bold text-[#111111] pt-4">Refund Process</h3>

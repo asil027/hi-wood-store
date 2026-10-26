@@ -18,6 +18,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 
 interface AdminSidebarProps {
   adminName: string;
@@ -27,6 +28,7 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ adminName, adminEmail }: AdminSidebarProps) {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { settings } = useSettings();
 
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -48,7 +50,7 @@ export default function AdminSidebar({ adminName, adminEmail }: AdminSidebarProp
         <div className="h-20 px-6 flex items-center justify-between border-b border-neutral-800/80">
           <Link href="/" className="flex items-center gap-0.5 group">
             <span className="text-2xl font-extrabold tracking-tight text-white">
-              Hiwood
+              {settings?.storeName || 'Hiwood'}
             </span>
             <span className="w-2.5 h-2.5 rounded-full bg-[#FF5A1F] ml-0.5"></span>
           </Link>

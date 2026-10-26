@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
 
@@ -49,6 +50,12 @@ export async function POST(req: Request) {
         details: 'Admin updated store content and configuration.',
       },
     });
+
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.warn('revalidatePath warning:', e);
+    }
 
     return NextResponse.json({ success: true, settings: updated });
   } catch (error: any) {

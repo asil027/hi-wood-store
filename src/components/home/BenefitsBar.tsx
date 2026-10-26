@@ -1,12 +1,18 @@
+'use client';
+
 import React from 'react';
 import { Truck, ShieldCheck, RefreshCw, Headphones } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function BenefitsBar() {
+  const { settings } = useSettings();
+  const threshold = settings?.freeShippingThreshold ?? 3000;
+
   const benefits = [
     {
       icon: Truck,
       title: 'Free Shipping',
-      subtitle: 'On orders over Rs. 3000',
+      subtitle: `On orders over Rs. ${threshold.toLocaleString()}`,
     },
     {
       icon: ShieldCheck,

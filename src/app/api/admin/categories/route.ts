@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
 
@@ -63,6 +64,12 @@ export async function POST(req: Request) {
         details: `Created bag category slug: ${category.slug}`,
       },
     });
+
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.warn('revalidatePath error:', e);
+    }
 
     return NextResponse.json({ success: true, category });
   } catch (error: any) {

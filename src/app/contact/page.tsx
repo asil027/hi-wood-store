@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function ContactPage() {
+  const { settings } = useSettings();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -49,7 +51,14 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <span className="font-bold text-[#111111] block text-sm">Direct Phone & WhatsApp</span>
-                  <span>+92 300 1234567</span>
+                  <a
+                    href={`https://wa.me/${(settings?.contactPhone || '').replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-[#FF5A1F] transition-colors"
+                  >
+                    {settings?.contactPhone || '+92 300 1234567'}
+                  </a>
                 </div>
               </div>
 
@@ -59,7 +68,12 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <span className="font-bold text-[#111111] block text-sm">Email Inquiries</span>
-                  <span>support@hiwood.pk</span>
+                  <a
+                    href={`mailto:${settings?.contactEmail || 'support@hiwood.pk'}`}
+                    className="hover:text-[#FF5A1F] transition-colors"
+                  >
+                    {settings?.contactEmail || 'support@hiwood.pk'}
+                  </a>
                 </div>
               </div>
 
@@ -69,14 +83,25 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <span className="font-bold text-[#111111] block text-sm">Headquarters & Warehouse</span>
-                  <span>Plot 42, Sector 15, Korangi Industrial Area, Karachi, Pakistan</span>
+                  <span>{settings?.address || 'Plot 42, Sector 15, Korangi Industrial Area, Karachi, Pakistan'}</span>
                 </div>
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-orange-50 border border-orange-200/80 text-xs text-neutral-700 space-y-1">
               <span className="font-bold text-[#FF5A1F] block">Instant WhatsApp Support:</span>
-              <p>For quick order status updates or courier tracking inquiries, send a message to +92 300 1234567 with your Order Number.</p>
+              <p>
+                For quick order status updates or courier tracking inquiries, send a message to{' '}
+                <a
+                  href={`https://wa.me/${(settings?.contactPhone || '').replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-bold text-[#FF5A1F] underline"
+                >
+                  {settings?.contactPhone || '+92 300 1234567'}
+                </a>{' '}
+                with your Order Number.
+              </p>
             </div>
           </div>
 

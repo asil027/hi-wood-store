@@ -122,7 +122,10 @@ export async function POST(req: Request) {
       }
 
       // 4. Shipping calculation
-      const shippingFee = serverSubtotal >= 3000 ? 0 : 250;
+      const storeSettings = await tx.storeSettings.findUnique({ where: { id: 'default' } });
+      const freeThreshold = storeSettings?.freeShippingThreshold ?? 3000;
+      const stdFee = storeSettings?.standardShippingFee ?? 250;
+      const shippingFee = serverSubtotal >= freeThreshold ? 0 : stdFee;
       const totalAmount = Math.max(0, serverSubtotal - discountAmount + shippingFee);
 
       // 5. Generate unique Order Number

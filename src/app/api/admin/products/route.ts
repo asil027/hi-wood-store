@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
 
@@ -87,6 +88,12 @@ export async function POST(req: Request) {
       },
     });
 
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.warn('revalidatePath error:', e);
+    }
+
     return NextResponse.json({ success: true, product });
   } catch (error: any) {
     console.error('Error creating product:', error);
@@ -133,6 +140,12 @@ export async function DELETE(req: Request) {
         details: `Deleted product SKU ${existing.sku} (ID: ${id})`,
       },
     });
+
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.warn('revalidatePath error:', e);
+    }
 
     return NextResponse.json({ success: true, message: 'Product deleted successfully', id });
   } catch (error: any) {

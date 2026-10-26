@@ -18,6 +18,7 @@ export default function CartPage() {
     shippingFee,
     totalAmount,
     coupon,
+    freeShippingThreshold = 3000,
     applyCoupon,
     removeCoupon,
   } = useCart();
@@ -75,13 +76,15 @@ export default function CartPage() {
                   <span>Free Shipping Status</span>
                 </span>
                 <span className="text-[#FF5A1F]">
-                  {subtotal >= 3000 ? 'Unlocked! FREE Nationwide Delivery' : `Add Rs. ${(3000 - subtotal).toLocaleString()} for Free Delivery`}
+                  {subtotal >= freeShippingThreshold
+                    ? 'Unlocked! FREE Nationwide Delivery'
+                    : `Add Rs. ${(freeShippingThreshold - subtotal).toLocaleString()} for Free Delivery`}
                 </span>
               </div>
               <div className="w-full bg-neutral-200 h-2 rounded-full overflow-hidden">
                 <div
                   className="bg-[#FF5A1F] h-full transition-all duration-300 rounded-full"
-                  style={{ width: `${Math.min(100, (subtotal / 3000) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (subtotal / (freeShippingThreshold || 3000)) * 100)}%` }}
                 />
               </div>
             </div>

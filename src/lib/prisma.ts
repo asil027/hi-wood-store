@@ -9,12 +9,16 @@ const globalForPrisma = globalThis as unknown as {
 function getPrismaClient(): PrismaClient {
   let dbUrl = process.env.DATABASE_URL;
 
-  // On Vercel / serverless environments, copy SQLite to /tmp so it is fully writable
-  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  // On Vercel / serverless environments with SQLite, copy to /tmp so it is fully writable
+  if ((process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) && (!dbUrl || dbUrl.startsWith('file:'))) {
     const tmpDbPath = path.join('/tmp', 'dev.db');
-    const srcDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+    const possibleSrcPaths = [
+      path.join(process.cwd(), 'prisma', 'dev.db'),
+      path.join(process.cwd(), 'dev.db'),
+    ];
+    const srcDbPath = possibleSrcPaths.find((p) => fs.existsSync(p));
 
-    if (!fs.existsSync(tmpDbPath) && fs.existsSync(srcDbPath)) {
+    if (!fs.existsSync(tmpDbPath) && srcDbPath) {
       try {
         fs.copyFileSync(srcDbPath, tmpDbPath);
       } catch (e) {

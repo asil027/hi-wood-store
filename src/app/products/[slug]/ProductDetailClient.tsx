@@ -19,6 +19,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useSettings } from '@/context/SettingsContext';
 
 interface ProductDetailClientProps {
   product: any;
@@ -31,6 +32,8 @@ export default function ProductDetailClient({
 }: ProductDetailClientProps) {
   const router = useRouter();
   const { addItem } = useCart();
+  const { settings } = useSettings();
+  const threshold = settings?.freeShippingThreshold ?? 3000;
 
   const [selectedImage, setSelectedImage] = useState<string>(
     product.images[0]?.url || '/images/hero-backpack.png'
@@ -342,7 +345,7 @@ export default function ProductDetailClient({
             <div className="pt-4 border-t border-neutral-200/80 space-y-3 text-xs text-neutral-600">
               <div className="flex items-center gap-3">
                 <Truck className="w-4 h-4 text-[#FF5A1F] shrink-0" />
-                <span>Free nationwide delivery over Rs. 3,000 (2-4 business days)</span>
+                <span>Free nationwide delivery over Rs. {threshold.toLocaleString()} (2-4 business days)</span>
               </div>
               <div className="flex items-center gap-3">
                 <RefreshCw className="w-4 h-4 text-[#FF5A1F] shrink-0" />

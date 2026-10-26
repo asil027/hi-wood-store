@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   Plus,
   Search,
@@ -30,6 +31,7 @@ export default function ProductsManager({
   categories: initialCategories,
   collections,
 }: ProductsManagerProps) {
+  const router = useRouter();
   const [products, setProducts] = useState(initialProducts);
   const [categories, setCategories] = useState(initialCategories);
   const [search, setSearch] = useState('');
@@ -229,6 +231,7 @@ export default function ProductsManager({
           );
           setIsModalOpen(false);
           setSuccessMsg(`Product "${name}" updated successfully.`);
+          router.refresh();
           setTimeout(() => setSuccessMsg(''), 4000);
         } else {
           setError(data.error || 'Failed to update product');
@@ -258,6 +261,7 @@ export default function ProductsManager({
           setProducts([data.product, ...products]);
           setIsModalOpen(false);
           setSuccessMsg(`Bag product "${name}" added successfully with your photo!`);
+          router.refresh();
           setTimeout(() => setSuccessMsg(''), 4000);
         } else {
           setError(data.error || 'Failed to create product');
@@ -284,6 +288,7 @@ export default function ProductsManager({
         setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
         setSuccessMsg(`Product "${productToDelete.name}" was successfully deleted.`);
         setProductToDelete(null);
+        router.refresh();
         setTimeout(() => setSuccessMsg(''), 4000);
       } else {
         alert(data.error || 'Failed to delete product');

@@ -3,29 +3,49 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, Search, User as UserIcon, Menu, X, Shield, ChevronDown, ArrowRight, Sparkles } from 'lucide-react';
+import { ShoppingBag, Search, User as UserIcon, Menu, X, Shield, ChevronDown, ArrowRight, Sparkles, Phone } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { totalItems, setIsCartOpen } = useCart();
   const { user } = useAuth();
+  const { settings, categories: dbCategories } = useSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(true);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const bagCategories = [
-    { name: 'Backpacks', slug: 'backpacks', icon: '🎒', desc: 'Commute, campus & daily carry' },
-    { name: 'Travel Bags', slug: 'travel-bags', icon: '✈️', desc: 'Carry-on luggage & travel packs' },
-    { name: 'Laptop Bags', slug: 'laptop-bags', icon: '💻', desc: 'Padded tech sleeves & briefpacks' },
-    { name: 'Daypacks', slug: 'daypacks', icon: '⚡', desc: 'Ultralight compact day bags' },
-    { name: 'Duffel Bags', slug: 'duffel-bags', icon: '🏋️', desc: 'Gym, sports & weekender duffels' },
-    { name: 'Crossbody Bags', slug: 'crossbody-bags', icon: '👜', desc: 'Hands-free compact slings' },
-    { name: 'Accessories', slug: 'accessories', icon: '👝', desc: 'Pouches & tech organizers' },
-  ];
+  const defaultCategoryIcons: Record<string, string> = {
+    'backpacks': '🎒',
+    'travel-bags': '✈️',
+    'laptop-bags': '💻',
+    'daypacks': '⚡',
+    'duffel-bags': '🏋️',
+    'crossbody-bags': '👜',
+    'accessories': '👝',
+  };
+
+  const bagCategories =
+    dbCategories && dbCategories.length > 0
+      ? dbCategories.map((c) => ({
+          name: c.name,
+          slug: c.slug,
+          icon: defaultCategoryIcons[c.slug] || '🎒',
+          desc: c.description || `Explore ${c.name.toLowerCase()}`,
+        }))
+      : [
+          { name: 'Backpacks', slug: 'backpacks', icon: '🎒', desc: 'Commute, campus & daily carry' },
+          { name: 'Travel Bags', slug: 'travel-bags', icon: '✈️', desc: 'Carry-on luggage & travel packs' },
+          { name: 'Laptop Bags', slug: 'laptop-bags', icon: '💻', desc: 'Padded tech sleeves & briefpacks' },
+          { name: 'Daypacks', slug: 'daypacks', icon: '⚡', desc: 'Ultralight compact day bags' },
+          { name: 'Duffel Bags', slug: 'duffel-bags', icon: '🏋️', desc: 'Gym, sports & weekender duffels' },
+          { name: 'Crossbody Bags', slug: 'crossbody-bags', icon: '👜', desc: 'Hands-free compact slings' },
+          { name: 'Accessories', slug: 'accessories', icon: '👝', desc: 'Pouches & tech organizers' },
+        ];
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -52,7 +72,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-0.5 group">
             <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
-              Hiwood
+              {settings?.storeName || 'Hiwood'}
             </span>
             <span className="w-2.5 h-2.5 rounded-full bg-[#FF5A1F] ml-0.5 transition-transform group-hover:scale-125"></span>
           </Link>
@@ -372,7 +392,7 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="text-sm font-semibold py-2 px-3 rounded-xl text-[#111111] hover:bg-gray-50"
               >
-                About Hiwood
+                About {settings?.storeName || 'Hiwood'}
               </Link>
 
               <Link
@@ -382,6 +402,22 @@ export default function Navbar() {
               >
                 Contact Us
               </Link>
+
+              {settings?.contactPhone && (
+                <a
+                  href={`https://wa.me/${settings.contactPhone.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-xs font-bold text-neutral-700 py-2.5 px-3 rounded-xl bg-orange-50/70 border border-orange-200/60 flex items-center justify-between text-[#FF5A1F]"
+                >
+                  <span className="flex items-center gap-2">
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Helpline / WhatsApp</span>
+                  </span>
+                  <span>{settings.contactPhone}</span>
+                </a>
+              )}
 
               <Link
                 href="/admin"

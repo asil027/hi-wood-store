@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 
 const PAKISTANI_CITIES = [
   'Karachi',
@@ -40,6 +41,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, discountAmount, shippingFee, totalAmount, coupon, clearCart } = useCart();
   const { user } = useAuth();
+  const { settings } = useSettings();
 
   // Form Fields
   const [customerName, setCustomerName] = useState(user?.name || '');
@@ -254,73 +256,74 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-3">
-                
-                {/* Cash on Delivery Option */}
-                <label
-                  className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-                    paymentMethod === 'COD'
-                      ? 'border-[#FF5A1F] bg-orange-50/40'
-                      : 'border-neutral-200 hover:border-neutral-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === 'COD'}
-                    onChange={() => setPaymentMethod('COD')}
-                    className="mt-1 accent-[#FF5A1F]"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <Truck className="w-4 h-4 text-[#FF5A1F]" />
-                      <span className="text-sm font-bold text-[#111111]">
-                        Cash on Delivery (COD)
-                      </span>
-                      <span className="text-[10px] font-bold bg-[#111111] text-white px-2 py-0.5 rounded-full">
-                        Recommended
-                      </span>
+                {/* Cash on Delivery */}
+                {settings?.codEnabled !== false && (
+                  <label
+                    className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
+                      paymentMethod === 'COD'
+                        ? 'border-[#FF5A1F] bg-orange-50/40'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={paymentMethod === 'COD'}
+                      onChange={() => setPaymentMethod('COD')}
+                      className="mt-1 accent-[#FF5A1F]"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Truck className="w-4 h-4 text-[#FF5A1F]" />
+                        <span className="text-sm font-bold text-[#111111]">
+                          Cash on Delivery (COD)
+                        </span>
+                        <span className="text-[10px] font-bold bg-[#111111] text-white px-2 py-0.5 rounded-full">
+                          Recommended
+                        </span>
+                      </div>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        Pay in cash when your {settings?.storeName || 'Hiwood'} package is physically delivered to your door.
+                      </p>
                     </div>
-                    <p className="text-xs text-neutral-500 mt-1">
-                      Pay in cash when your Hiwood package is physically delivered to your door.
-                    </p>
-                  </div>
-                </label>
+                  </label>
+                )}
 
                 {/* Direct Bank Transfer */}
-                <label
-                  className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-                    paymentMethod === 'BANK_TRANSFER'
-                      ? 'border-[#FF5A1F] bg-orange-50/40'
-                      : 'border-neutral-200 hover:border-neutral-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === 'BANK_TRANSFER'}
-                    onChange={() => setPaymentMethod('BANK_TRANSFER')}
-                    className="mt-1 accent-[#FF5A1F]"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-[#FF5A1F]" />
-                      <span className="text-sm font-bold text-[#111111]">
-                        Direct Bank Transfer (Meezan Bank)
-                      </span>
-                    </div>
-                    <p className="text-xs text-neutral-500 mt-1">
-                      Transfer directly to our corporate bank account via your mobile banking app or Raast ID.
-                    </p>
-                    {paymentMethod === 'BANK_TRANSFER' && (
-                      <div className="mt-3 p-3 bg-white rounded-xl border border-neutral-200 text-xs space-y-1 text-neutral-700 font-mono">
-                        <div>Bank: <strong>Meezan Bank Ltd</strong></div>
-                        <div>Title: <strong>Hiwood Bags Private Limited</strong></div>
-                        <div>Account: <strong>01020304050607</strong></div>
-                        <div>IBAN: <strong>PK65MEZN0001020304050607</strong></div>
+                {settings?.bankTransferEnabled !== false && (
+                  <label
+                    className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
+                      paymentMethod === 'BANK_TRANSFER'
+                        ? 'border-[#FF5A1F] bg-orange-50/40'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={paymentMethod === 'BANK_TRANSFER'}
+                      onChange={() => setPaymentMethod('BANK_TRANSFER')}
+                      className="mt-1 accent-[#FF5A1F]"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="w-4 h-4 text-[#FF5A1F]" />
+                        <span className="text-sm font-bold text-[#111111]">
+                          Direct Bank Transfer / Raast
+                        </span>
                       </div>
-                    )}
-                  </div>
-                </label>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        Transfer directly to our corporate bank account via your mobile banking app or Raast ID.
+                      </p>
+                      {paymentMethod === 'BANK_TRANSFER' && (
+                        <div className="mt-3 p-3.5 bg-white rounded-xl border border-neutral-200 text-xs text-neutral-800 font-mono whitespace-pre-line leading-relaxed shadow-sm">
+                          {settings?.bankDetails ||
+                            'Bank: Meezan Bank Ltd\nAccount Title: Hiwood Bags Private Limited\nAccount Number: 01020304050607\nIBAN: PK65MEZN0001020304050607'}
+                        </div>
+                      )}
+                    </div>
+                  </label>
+                )}
 
                 {/* Online Gateway Sandbox */}
                 <label

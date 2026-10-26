@@ -18,25 +18,33 @@ export default async function OrderConfirmationPage({
   const sp = searchParams ? await searchParams : {};
 
   let dbOrder = null;
+  let settings = null;
   try {
-    dbOrder = await prisma.order.findUnique({
-      where: { orderNumber },
-      include: {
-        items: true,
-      },
-    });
+    const [fetchedOrder, fetchedSettings] = await Promise.all([
+      prisma.order.findUnique({
+        where: { orderNumber },
+        include: {
+          items: true,
+        },
+      }),
+      prisma.storeSettings.findUnique({ where: { id: 'default' } }),
+    ]);
+    dbOrder = fetchedOrder;
+    settings = fetchedSettings;
   } catch (err) {
     console.warn('Prisma order fetch error:', err);
   }
 
   // Graceful fallback for serverless deployments where multi-container SQLite hasn't synchronized
   const totalAmountNum = sp.total ? Number(sp.total) : 3499;
+  const freeThreshold = settings?.freeShippingThreshold ?? 3000;
+  const stdFee = settings?.standardShippingFee ?? 250;
   const order = dbOrder || {
     id: `ord-${orderNumber}`,
     orderNumber,
     customerName: sp.name || 'Valued Customer',
-    customerEmail: sp.email || 'support@hiwood.pk',
-    customerPhone: '+92 300 1234567',
+    customerEmail: sp.email || settings?.contactEmail || 'support@hiwood.pk',
+    customerPhone: settings?.contactPhone || '+92 300 1234567',
     deliveryAddress: 'Shipping address provided at checkout',
     city: sp.city || 'Pakistan',
     deliveryNotes: null,
@@ -45,7 +53,7 @@ export default async function OrderConfirmationPage({
     orderStatus: 'PENDING',
     subtotal: totalAmountNum,
     discountAmount: 0,
-    shippingFee: totalAmountNum >= 3000 ? 0 : 250,
+    shippingFee: totalAmountNum >= freeThreshold ? 0 : stdFee,
     totalAmount: totalAmountNum,
     createdAt: new Date(),
     items: [
@@ -100,13 +108,11 @@ export default async function OrderConfirmationPage({
               <span>Direct Bank Transfer Details</span>
             </div>
             <p className="text-xs text-neutral-600">
-              Please transfer the total amount of <strong>Rs. {order.totalAmount.toLocaleString()}</strong> to the following Meezan Bank account and mention your Order Number <strong>{order.orderNumber}</strong> in the transfer remarks:
+              Please transfer the total amount of <strong>Rs. {order.totalAmount.toLocaleString()}</strong> to the designated account and mention your Order Number <strong>{order.orderNumber}</strong> in the transfer remarks:
             </p>
-            <div className="bg-white p-4 rounded-2xl border border-orange-200 font-mono text-xs space-y-1 text-neutral-800">
-              <div>Bank: <strong>Meezan Bank Ltd</strong></div>
-              <div>Account Title: <strong>Hiwood Bags Private Limited</strong></div>
-              <div>Account Number: <strong>01020304050607</strong></div>
-              <div>IBAN: <strong>PK65MEZN0001020304050607</strong></div>
+            <div className="bg-white p-4 rounded-2xl border border-orange-200 font-mono text-xs text-neutral-800 whitespace-pre-line leading-relaxed shadow-sm">
+              {settings?.bankDetails ||
+                'Bank: Meezan Bank Ltd\nAccount Title: Hiwood Bags Private Limited\nAccount Number: 01020304050607\nIBAN: PK65MEZN0001020304050607'}
             </div>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
 
@@ -37,6 +38,12 @@ export async function DELETE(
         details: `Deleted product SKU ${existing.sku} (ID: ${id})`,
       },
     });
+
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.warn('revalidatePath error:', e);
+    }
 
     return NextResponse.json({ success: true, message: 'Product deleted successfully', id });
   } catch (error: any) {
@@ -122,6 +129,12 @@ export async function PATCH(
         details: `Updated product SKU ${updated.sku} (Category: ${updated.category?.name || 'None'})`,
       },
     });
+
+    try {
+      revalidatePath('/', 'layout');
+    } catch (e) {
+      console.warn('revalidatePath error:', e);
+    }
 
     return NextResponse.json({ success: true, product: updated });
   } catch (error: any) {

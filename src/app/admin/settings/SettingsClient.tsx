@@ -1,9 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Save, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 export default function SettingsClient({ initialSettings }: { initialSettings: any }) {
+  const router = useRouter();
+  const { updateLocalSettings, refreshSettings } = useSettings();
   const [storeName, setStoreName] = useState(initialSettings?.storeName || 'Hiwood');
   const [tagline, setTagline] = useState(initialSettings?.tagline || 'Carry Your World');
   const [contactEmail, setContactEmail] = useState(initialSettings?.contactEmail || 'support@hiwood.pk');
@@ -28,30 +32,55 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  React.useEffect(() => {
+    try {
+      const cached = localStorage.getItem('hiwood_store_settings');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.storeName) setStoreName(parsed.storeName);
+        if (parsed.tagline) setTagline(parsed.tagline);
+        if (parsed.contactEmail) setContactEmail(parsed.contactEmail);
+        if (parsed.contactPhone) setContactPhone(parsed.contactPhone);
+        if (parsed.address) setAddress(parsed.address);
+        if (parsed.standardShippingFee !== undefined) setStandardShippingFee(String(parsed.standardShippingFee));
+        if (parsed.freeShippingThreshold !== undefined) setFreeShippingThreshold(String(parsed.freeShippingThreshold));
+        if (parsed.codEnabled !== undefined) setCodEnabled(Boolean(parsed.codEnabled));
+        if (parsed.bankDetails) setBankDetails(parsed.bankDetails);
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
 
     try {
+      const payload = {
+        storeName,
+        tagline,
+        contactEmail,
+        contactPhone,
+        address,
+        standardShippingFee: parseFloat(standardShippingFee) || 250,
+        freeShippingThreshold: parseFloat(freeShippingThreshold) || 3000,
+        codEnabled,
+        bankDetails,
+      };
+
       const res = await fetch('/api/admin/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storeName,
-          tagline,
-          contactEmail,
-          contactPhone,
-          address,
-          standardShippingFee: parseFloat(standardShippingFee),
-          freeShippingThreshold: parseFloat(freeShippingThreshold),
-          codEnabled,
-          bankDetails,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         setSaved(true);
+        updateLocalSettings(payload);
+        await refreshSettings();
+        router.refresh();
       }
     } catch {
       alert('Failed to update settings');
